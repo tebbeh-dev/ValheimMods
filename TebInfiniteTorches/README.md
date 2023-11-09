@@ -1,4 +1,4 @@
-# InfiniteTorches
+# TebInfiniteTorches
 - Created by tebbeh 
 - Discord: tebbeh#0933
 

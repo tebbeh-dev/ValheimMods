@@ -1,4 +1,4 @@
-# InfiniteTorches
+# TebBoatTweaks
 - Created by tebbeh 
 - Discord: tebbeh#0933
 

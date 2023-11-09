@@ -1,9 +1,6 @@
-# InfiniteTorches
-- Created by tebbeh 
-- Discord: tebbeh#0933
-
 # Welcome
 My page for ValheimMods.
+- Discord: tebbeh#0933
 
 # Contributing
 - All issues can be reported on the project Github. To report issues please be as specific as possible.
