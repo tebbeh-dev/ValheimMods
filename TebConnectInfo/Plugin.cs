@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
-using UnityEngine;
 using System.Net;
+using System.CodeDom;
+using System.Net.NetworkInformation;
+using Jotunn.Configs;
+using System.Collections.Generic;
 
 namespace Tebbeh.TebConnectInfo
 {
@@ -66,9 +63,9 @@ namespace Tebbeh.TebConnectInfo
             const string messages = "Messages";
 
             AddConfig("WebhookURL", general, "Webhook url (string).", true, "", ref WebhookURL);
-            AddConfig("WebhookName", general, "Webhook send as username (string).", true, "", ref WebhookName);
+            AddConfig("WebhookName", general, "Webhook send as username (string).", true, ModName, ref WebhookName);
             AddConfig("JoinMessage", messages, "Join message to post with webhook, manipulate after your needs. Standard is for Discord! (string).", true, ":green_circle: **{player}** has come online!", ref joinMessage);
-            AddConfig("LeaveMessage", messages, "Leave message to post with webhook, manipulate after your needs. Standard is for Discord! (string).", true, ":red_circle: **{player}** gone offline!", ref leaveMessage);
+            AddConfig("LeaveMessage", messages, "Leave message to post with webhook, manipulate after your needs. Standard is for Discord! (string).", true, ":red_circle: **{player}** has gone offline!", ref leaveMessage);
 
             #endregion
 
@@ -107,8 +104,7 @@ namespace Tebbeh.TebConnectInfo
             }
         }
 
-
-        private static void PostToDiscord(string content)
+        static void PostToDiscord(string content)
         {
             string webhookURL = WebhookURL.Value;
             string webhookUsername = WebhookName.Value;
@@ -132,15 +128,24 @@ namespace Tebbeh.TebConnectInfo
             });
         }
 
-        internal class GetConnectInfo
+        public class GetConnectInfo
         {
-
+            /// <summary>
+            /// Handle the Connect to post message with webhook
+            /// </summary>
             [HarmonyPatch(typeof(Chat), nameof(Chat.OnNewChatMessage))]
             private class OnConnect
             {
-                private static void Prefix(ref UserInfo user)
+                private static void Prefix(ref UserInfo user, ref Talker.Type type, ref string text)
                 {
+                    /// To prevent ping on map post message with webhook
+                    if (type != Talker.Type.Shout)
+                    {
+                        return;
+                    }
+
                     string playername = user.Name;
+
                     if (string.IsNullOrEmpty(playername))
                     {
                         return;
@@ -150,12 +155,15 @@ namespace Tebbeh.TebConnectInfo
                     postdata = postdata.Replace("{player}", playername);
 
                     PostToDiscord(postdata);
-                    
+
                 }
             }
 
+            /// <summary>
+            /// Handle the Disconnect to post message with webhook
+            /// </summary>
             [HarmonyPatch(typeof(ZNet), nameof(ZNet.RPC_Disconnect))]
-            internal class RPC_Disconnect
+            private class RPC_Disconnect
             {
                 private static void Prefix(ZRpc rpc)
                 {
@@ -177,3 +185,4 @@ namespace Tebbeh.TebConnectInfo
         }
     }
 }
+
