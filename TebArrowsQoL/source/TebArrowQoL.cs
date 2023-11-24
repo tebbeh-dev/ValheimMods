@@ -16,6 +16,11 @@ namespace TebArrowsQoL
 
                 GameObject itemPrefab = ObjectDB.instance.GetItemPrefab(arrowType);
 
+                if (!arrowType.Contains("arrow"))
+                {
+                    return;
+                }
+
                 float value = TebArrowsQoL.GetChanceToSaveArrowsValue();
 
                 if (value != 100)
